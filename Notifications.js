@@ -19,7 +19,7 @@ var Catalog = (function ($) {
             config = GetConfig();
             firebase.initializeApp(config);
             db = firebase.database(); 
-            InicializarBBDD();
+            //InicializarBBDD();
             lstChatPersona = new Array();
             currentPersonaID = PersonaId;   
             GetChats();
@@ -76,6 +76,22 @@ var Catalog = (function ($) {
                                     $(liNotification).remove();
 
                                 AddLiChat(_chatID,_chat.Titulo,_chat.LastMessage, classNewMessages, _chat.NewMessages);
+                            }
+
+                            if(_chat.NewMessages != 0) {
+
+                                //Si el chat esta activo en ese momento
+                                //Updateamos el numero de mensajes de leer en el chat
+                                if ($("#" + _chatID).hasClass('active')){
+                                    $("#listChats").find('#' + _chatID).find(".bagdeNewMessages").html(_chat.NewMessages).addClass( "oculto");
+                                    updateNewMessages(_chatID, currentPersonaID, 0);
+                                }
+                                else {
+                                    $("#listChats").find('#' + _chatID).find(".bagdeNewMessages").html(_chat.NewMessages).removeClass( "oculto");
+                                }   
+                            }
+                            else {
+                                $("#listChats").find('#' + _chatID).find(".bagdeNewMessages").html(_chat.NewMessages).addClass( "oculto");    
                             }
                         }
                         else{
@@ -153,6 +169,7 @@ var Catalog = (function ($) {
                 $(this).addClass("active");
                 $(".messages").find("ul").find("li").remove();
                 $('#contentChat').show();
+                $( ".message-input input").focus();
 
                 GetMessages();
             });
@@ -213,11 +230,18 @@ var Catalog = (function ($) {
                             newMessages = valor.val()[currentChatID].NewMessages + 1
                         }
 
-                        db.ref('PersonasChat/'+lstChatPersona[currentChatID][indice]+"/"+currentChatID).set({
+                        db.ref("PersonasChat/" + lstChatPersona[currentChatID][indice] + "/"  + currentChatID + "/Titulo").set(String(titulo));
+                        db.ref("PersonasChat/" + lstChatPersona[currentChatID][indice] + "/"  + currentChatID + "/NewMessages").set(parseInt(newMessages));
+                        db.ref("PersonasChat/" + lstChatPersona[currentChatID][indice] + "/"  + currentChatID + "/LastMessage").set(String(mensaje));
+
+
+                       /* db.ref('PersonasChat/'+lstChatPersona[currentChatID][indice]+"/"+currentChatID).set({
                         "Titulo": titulo, 
                         "NewMessages": newMessages,
                         "LastMessage": mensaje
-                        });
+                        });*/
+
+
 
                     //console.log("Actualicé chat " + currentChatID + " de la persona " + personaID);
                     } 
@@ -293,7 +317,7 @@ var Catalog = (function ($) {
         function GenericFunctions() {
             
             $('.submit').click(function() {
-                newMessage();
+                NewMessage();
             });
 
             $(document).on('click', '#notificationPanel > li > button', function(){
@@ -359,7 +383,7 @@ var Catalog = (function ($) {
             });
             $(window).on('keydown', function(e) {
                 if (e.which == 13) {
-                    newMessage();
+                    NewMessage();
                     return false;
                 }
             });
@@ -453,11 +477,14 @@ var Catalog = (function ($) {
 
 
         function AddLiNotification(notificationID, chatID, notificationType, description, chatLastMessage, chatNewMessages, personaID, CreateDate){
-            
-            var liElement = "<li notificationtype='"+notificationType+"' chatid='"+chatID+"' notificationid='"+notificationID+"' chatLastMessage='"+chatLastMessage+"' chatNewMessages='"+chatNewMessages+"' description='"+description+"' personaID = '"+personaID+"' CreateDate = '"+CreateDate+"' style='padding: 5px;'><img  src='http://emilcarlsson.se/assets/mikeross.png' class='online' alt='' style='width: 50px;border-radius: 50 padding: 3px; border: 2px solid #e74c3c;  height: auto;float: left; cursor: pointer; -moz-transition: 0.3s border ease;-o-transition: 0.3s border ease; -webkit-transition: 0.3s border ease; transition: 0.3s border ease;' /><span description>"+description+"</span>";
-            liElement += "<br><button value=1><span>Aceptar</span></button><button value=0><span>Desviar</span></button>";
-            liElement += "<br>Tiempo de Espera: <span waitingtime></span>";
-            liElement += "<br>Tiempo restante: <span remainingtime></span></li>";
+                    
+                    var liElement = "<li style='padding: 5px;' notificationtype='"+notificationType+"' chatid='"+chatID+"' notificationid='"+notificationID+"' chatLastMessage='"+chatLastMessage+"' chatNewMessages='"+chatNewMessages+"' description='"+description+"' personaID = '"+personaID+"' CreateDate = '"+CreateDate+"'>";
+                    liElement += "<div id='imagenNotificacion''><img style='width: 50px;' src='http://emilcarlsson.se/assets/mikeross.png'></div>";
+                    liElement += "<div class='card card-telefonica '> <div class='card-body card-notification' style='padding-top: 20px;'><h5 class='card-title center'>Carla Gomez</h5><h6 class='card-subtitle mb-2 text-muted center'>Cliente (empleado)</h6>";
+                    liElement += "<p class='card-text'><div class='col-lg-12 center pbottom-x' ><div class='btn-group' role='group' aria-label='Basic example'><button type='button' class='btn btn-secondary btn-sm btn-accept-notification btn-accept'>Aceptar</button><button type='button' class='btn btn-sm btn-secondary btn-accept-notification btn-desviar' style=''>Desviar</button></div></div></p>";            
+                    liElement += "</p><h6 class='card-subtitle mb-2 text-muted center .ptop-x'>Tiempo de espera</h6><h5 class='card-title center'>0d 2h 34m 34s</h5></div></div></li>";             
+
+                                    
             $("#notificationPanel").append(liElement);
         }
 
