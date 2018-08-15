@@ -55,10 +55,10 @@
 						</div>
 						<div id="search">
 							<label for=""><i class="fa fa-search" aria-hidden="true"></i></label>
-							<input type="text" placeholder="Buscar contactos..." />
+							<input type="text" class="live-search-box" placeholder="Buscar contactos..." />
 						</div>
 						<div id="contacts">
-							<ul id="listChats">
+							<ul id="listChats" class="list live-search-list">
 				
 							</ul>
 						</div>
@@ -73,12 +73,24 @@
 								<div class="content" id="contentChat">
 										<div class="contact-profile">
 											<img alt="" />
-											<p>Harvey Specter</p>
-											<div class="social-media">
-												<i class="fa fa-facebook" aria-hidden="true"></i>
-												<i class="fa fa-twitter" aria-hidden="true"></i>
-				 								<i class="fa fa-instagram" aria-hidden="true"></i>
+											<div class="row">
+												
+											<div class="col col-lg-4">
+												<div style="max-height: 20px;" class="nombrePersona">
+													Harvey Specter
+												</div>
+												<div class="tipoPersona">
+													Gestor
+												</div>
 											</div>
+											<div class="col col-lg-8" style="text-align: right;">
+												  <button type="button" class="btn btn btn-default btn-llamar">Llamar</button>
+												  <button type="button" class="btn btn-default btn-perfil">Perfil</button>
+											</div>
+											</div>
+											
+											
+											
 										</div>
 										<div class="messages">
 											<ul>

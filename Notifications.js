@@ -26,6 +26,22 @@ var Catalog = (function ($) {
             GenericFunctions();
             ListenerNotification();
 
+            $('.live-search-box').bind('keyup', function() {
+   
+                var searchString = $(this).val();
+
+                $("ul#listChats li").each(function(index, value) {
+                    
+                    currentName = $(value).text()
+                    if( currentName.toUpperCase().indexOf(searchString.toUpperCase()) > -1) {
+                       $(value).show();
+                    } else {
+                        $(value).hide();
+                    }
+                    
+                });
+                
+            })
         }
 
         function rellenarLstPersonas(a) {
@@ -49,10 +65,15 @@ var Catalog = (function ($) {
 
             
         }
-
+        function deleteChatLi(_chatId) {
+            $("#" + _chatId).remove();
+        }
         function GetChats() {
             lstChats = db.ref('/PersonasChat/'+currentPersonaID);
+            
             //OBTIENE CHATS
+
+          
             lstChats.on('value', function(snapshot) { 
                 
                 if(snapshot.val() != null)
@@ -64,8 +85,18 @@ var Catalog = (function ($) {
 
                         if(_chat.Estatus != -1){
                             if($("#listChats").find('#' + _chatID).length){
-
+                                //Si es el primer chat de la lista entonces se updatea
+                                /*if($("#listChats").find('li').first().attr("id") == $("#listChats").find('#' + _chatID).attr("id"))
+                                {
+                                    UpdateLiChat(_chatID,_chat.Titulo,_chat.LastMessage);
+                                }
+                                else {//si no, se limpia y se vuelve añadir para que aparezca arriba
+                                    deleteChatLi(_chatID);
+                                    AddLiChat(_chatID,_chat.Titulo,_chat.LastMessage, classNewMessages, _chat.NewMessages);
+                                }
+*/
                                 UpdateLiChat(_chatID,_chat.Titulo,_chat.LastMessage);
+                                
                             }
                             else{
                                 if(_chat.NewMessages == 0) 
@@ -206,7 +237,7 @@ var Catalog = (function ($) {
             if(mensaje == '') 
                 return false;
 
-            CrearMensajes(currentChatID, { "Texto": mensaje, "Nombre":  $('#nombre').val(), "PersonaID": currentPersonaID});
+            CrearMensajes(currentChatID, { "Texto": mensaje, "Nombre":  $('#nombre').val(), "PersonaID": currentPersonaID, "CreateDate": Date.now()});
 
 
             lstChatPersona[currentChatID].forEach(function(_personaID) { 
@@ -265,16 +296,23 @@ var Catalog = (function ($) {
 
         /*Escucha mensajes de un determinado chat*/
         function ListenMessages(_chatID) {
-            var ref = db.ref('Mensajes/'+_chatID);
+            var ref = db.ref('Mensajes/'+_chatID).orderByChild("CreateDate").limitToLast(30);
+
             ref.on('child_added', function(data){ //Cambio en los mensajes de un chats
                 AddLiMessage(data.val().Nombre == $('#nombre').val(), arrayPersons[data.val().PersonaID].Image, data.val().Nombre, data.val().Texto);
                 var messages = $('.messages');
                 var height = messages[0].scrollHeight;
                 messages.scrollTop(height);
-
                 updateNewMessages(currentChatID, currentPersonaID, "0");
+                
             });
+
+
             return ref;
+        }
+
+        function a () {
+            alert('1');
         }
 
         function ListenerNotification(){
@@ -505,7 +543,7 @@ var Catalog = (function ($) {
         }
 
         function AddLiChat(chatID,titulo,lastMessage,classNewMessages,newMessages){
-            $('#listChats').append('<li class="contact" chatid="'+chatID+'" id="' + chatID + '"><div class="row"><div class="col col-lg-8"><div class="wrap"><span class="contact-status busy"></span><img src="blank.gif" alt="" /><div class="meta"><p class="titleChat">' + titulo + '</p><p class="lastMessage">' + lastMessage + '</p></div></div></div><div class="col col-lg-4"><span class="badge badge-pill badge-danger ' + classNewMessages + ' bagdeNewMessages">'+ newMessages+'</span></div></div></li>');
+            $('#listChats').append('<li class="contact" data-search-term="' + titulo + '" chatid="'+chatID+'" id="' + chatID + '"><div class="row"><div class="col col-lg-8"><div class="wrap"><span class="contact-status busy"></span><img src="blank.gif" alt="" /><div class="meta"><p class="titleChat">' + titulo + '</p><p class="lastMessage">' + lastMessage + '</p></div></div></div><div class="col col-lg-4"><span class="badge badge-pill badge-danger ' + classNewMessages + ' bagdeNewMessages">'+ newMessages+'</span></div></div></li>');
         }
 
         function UpdateLiChat(chatID,titulo,lastMessage){
